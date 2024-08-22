@@ -1,1 +1,1 @@
-FROM openvidu/openvidu-server-kms:2.22.0
+FROM ghcr.io/heyputer/puter:latest
