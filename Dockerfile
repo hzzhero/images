@@ -1,1 +1,1 @@
-FROM ghcr.io/heyputer/puter:latest
+FROM  jpom-server:latest
