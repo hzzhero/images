@@ -1,1 +1,1 @@
-FROM  jpom-server:latest
+FROM  manadr/wkhtml2pdf
