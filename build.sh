@@ -1,0 +1,1 @@
+docker build -t  heasytier:1.0  .
