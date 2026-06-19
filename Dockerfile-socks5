@@ -1,27 +1,43 @@
-# 阶段1：编译构建器
-FROM alpine:3.20 AS builder
+#
+# Dockerfile for hev-socks5-server
+#
 
-# 安装编译依赖
-RUN apk add --no-cache git gcc make musl-dev linux-headers
+#
+# Build stage
+#
+FROM alpine AS builder
 
-# 拉取源码编译
-WORKDIR /build
-RUN git clone https://github.com/heiher/hev-socks5-server.git
-WORKDIR /build/hev-socks5-server
-RUN make clean && make
+COPY . /tmp/hev-socks5-server
 
-# 阶段2：最终运行镜像（纯alpine极简基础）
-FROM alpine:3.20
+# build
+RUN apk update \
+  && apk add --no-cache --virtual .build-deps build-base \
+  && cd /tmp/hev-socks5-server \
+  && make clean \
+  && make -j$(nproc) \
+  && make install INSTDIR="/app" \
+  && make clean \
+  && cd / \
+  && rm -r /tmp/hev-socks5-server \
+  && apk del .build-deps \
+  && rm -rf /var/cache/apk/*
 
-# 只复制编译好的静态二进制，丢弃所有源码、编译工具
-COPY --from=builder /build/hev-socks5-server/bin/hev-socks5-server /usr/local/bin/
+#
+# Runtime stage
+#
+FROM alpine
 
-# 暴露默认socks5端口
-EXPOSE 1080
+ENV TZ=Asia/Taipei
 
-# 启动入口，可通过环境变量自定义账号密码、监听地址
-ENV LISTEN=0.0.0.0:1080
-ENV USER=user
-ENV PASS=123456
+# add depends
+RUN apk update \
+  && apk add --no-cache tzdata \
+  && rm -rf /var/cache/apk/*
 
-CMD ["sh", "-c", "hev-socks5-server --listen $LISTEN --auth $USER:$PASS"]
+# copy files
+COPY --from=builder /app /app/
+RUN chown nobody:nobody /app/etc
+COPY docker/entrypoint.sh /app/entrypoint.sh
+
+USER nobody
+ENTRYPOINT ["/app/entrypoint.sh"]
