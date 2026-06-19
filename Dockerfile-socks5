@@ -1,5 +1,5 @@
 # 阶段2：最终运行镜像（纯alpine极简基础）
-FROM alpine:3.20
+FROM alpine
 
 WORKDIR /
 COPY  hev-socks5-server  /hev-socks5-server
