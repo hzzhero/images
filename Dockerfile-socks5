@@ -12,4 +12,4 @@ ENV LISTEN=0.0.0.0:1080
 ENV USER=user
 ENV PASS=123456
 
-CMD ["sh", "-c", "hev-socks5-server --listen $LISTEN --auth $USER:$PASS"]
+CMD ["sh", "-c", "/hev-socks5-server --listen $LISTEN --auth $USER:$PASS"]
