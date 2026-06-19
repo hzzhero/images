@@ -1,0 +1,92 @@
+FROM rockylinux:9
+
+ENV container docker
+
+# =========================
+# 1. 基础 repo 修复（关键）
+# =========================
+RUN dnf -y install dnf-utils && \
+    dnf clean all && \
+    dnf makecache --refresh
+
+# =========================
+# 2. 系统工具（不含 epel）
+# =========================
+RUN dnf -y install systemd && dnf clean all
+RUN dnf -y install systemd-sysv && dnf clean all
+
+RUN dnf -y install procps-ng && dnf clean all
+RUN dnf -y install iproute && dnf clean all
+RUN dnf -y install iputils && dnf clean all
+RUN dnf -y install passwd && dnf clean all
+RUN dnf -y install sudo && dnf clean all
+RUN dnf -y install wget && dnf clean all
+## RUN dnf -y install curl && dnf clean all
+RUN dnf -y install vim && dnf clean all
+RUN dnf -y install git && dnf clean all
+RUN dnf -y install openssh-server && dnf clean all
+RUN dnf -y install openssh-clients && dnf clean all
+RUN dnf -y install tar && dnf clean all
+RUN dnf -y install unzip && dnf clean all
+RUN dnf -y install hostname && dnf clean all
+RUN dnf -y install which && dnf clean all
+RUN dnf -y install net-tools && dnf clean all
+
+# =========================
+# 3. epel 单独安装（关键修复点）
+# =========================
+RUN dnf -y install epel-release || true && \
+    dnf makecache --refresh
+
+# =========================
+# 4. SSH 配置
+# =========================
+RUN ssh-keygen -A && \
+    echo "root:root123456" | chpasswd && \
+    sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    sed -i 's/#PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+
+# =========================
+# 5. JDK 21
+# =========================
+ENV JAVA_VERSION=jdk-21.0.5+11
+
+RUN wget -O /tmp/jdk.tar.gz \
+    https://github.com/adoptium/temurin21-binaries/releases/download/${JAVA_VERSION}/OpenJDK21U-jdk_x64_linux_hotspot_21.0.5_11.tar.gz && \
+    mkdir -p /opt/java && \
+    tar -xzf /tmp/jdk.tar.gz -C /opt/java && \
+    mv /opt/java/jdk-* /opt/java/jdk21 && \
+    rm -f /tmp/jdk.tar.gz
+
+ENV JAVA_HOME=/opt/java/jdk21
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+# =========================
+# 6. Maven
+# =========================
+ENV MAVEN_VERSION=3.9.9
+
+RUN wget -O /tmp/maven.tar.gz \
+    https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
+    mkdir -p /opt/maven && \
+    tar -xzf /tmp/maven.tar.gz -C /opt/maven && \
+    ln -s /opt/maven/apache-maven-${MAVEN_VERSION} /opt/maven/latest && \
+    rm -f /tmp/maven.tar.gz
+
+ENV MAVEN_HOME=/opt/maven/latest
+ENV PATH=$MAVEN_HOME/bin:$PATH
+
+# =========================
+# 7. Node.js 20
+# =========================
+RUN wget -qO- https://rpm.nodesource.com/setup_20.x | bash - && \
+    dnf -y install nodejs && \
+    node -v && npm -v
+
+# =========================
+# 8. systemd support
+# =========================
+VOLUME ["/sys/fs/cgroup"]
+STOPSIGNAL SIGRTMIN+3
+
+CMD ["/usr/sbin/init"]
