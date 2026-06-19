@@ -90,4 +90,16 @@ RUN wget -qO- https://rpm.nodesource.com/setup_20.x | bash - && \
 VOLUME ["/sys/fs/cgroup"]
 STOPSIGNAL SIGRTMIN+3
 
+RUN dnf config-manager --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+
+# =========================
+# 8. Docker in Docker
+# =========================
+
+RUN dnf install -y \
+    docker-ce \
+    docker-ce-cli \
+    containerd.io   &&  dnf clean all
+
 CMD ["/usr/sbin/init"]
