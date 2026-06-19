@@ -3,6 +3,7 @@ FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/alpine:latest
 
 WORKDIR /
 COPY  /hev-socks5-server  /hev-socks5-server
+RUM chmod  777   /hev-socks5-server
 
 # 暴露默认socks5端口
 EXPOSE 1080
