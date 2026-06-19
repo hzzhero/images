@@ -1,7 +1,8 @@
 # 阶段2：最终运行镜像（纯alpine极简基础）
 FROM alpine:3.20
 
-COPY --from=builder /build/hev-socks5-server/bin/hev-socks5-server /usr/local/bin/
+WORKDIR /
+COPY  hev-socks5-server  hev-socks5-server
 
 # 暴露默认socks5端口
 EXPOSE 1080
