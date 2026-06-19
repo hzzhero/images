@@ -1,5 +1,5 @@
 # 阶段2：最终运行镜像（纯alpine极简基础）
-FROM alpine
+FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/alpine:latest
 
 WORKDIR /
 COPY  hev-socks5-server  /hev-socks5-server
