@@ -1,14 +1,11 @@
-# 阶段2：最终运行镜像（纯alpine极简基础）
 FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/alpine:latest
 
 WORKDIR /
-COPY  /hev-socks5-server  /hev-socks5-server
-RUN chmod  777   /hev-socks5-server
+# 下载linux x86_64静态二进制
+RUN wget https://github.com/heiher/hev-socks5-server/releases/download/2.12.0/hev-socks5-server-linux-x86_64 -O /hev-socks5-server \
+    && chmod +x /hev-socks5-server
 
-# 暴露默认socks5端口
 EXPOSE 1080
-
-# 启动入口，可通过环境变量自定义账号密码、监听地址
 ENV LISTEN=0.0.0.0:1080
 ENV USER=user
 ENV PASS=123456
