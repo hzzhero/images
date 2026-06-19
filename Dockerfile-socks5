@@ -2,7 +2,7 @@
 FROM alpine:3.20
 
 WORKDIR /
-COPY  hev-socks5-server  hev-socks5-server
+COPY  hev-socks5-server  /hev-socks5-server
 
 # 暴露默认socks5端口
 EXPOSE 1080
